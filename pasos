@@ -1,0 +1,108 @@
+//Instalar dependencias
+sudo apt update
+sudo apt install apache2 \
+                 ghostscript \
+                 libapache2-mod-php \
+                 mysql-server \
+                 php \
+                 php-bcmath \
+                 php-curl \
+                 php-imagick \
+                 php-intl \
+                 php-json \
+                 php-mbstring \
+                 php-mysql \
+                 php-xml \
+                 php-zip
+
+            
+// 2 instalacion del directorio
+
+sudo mkdir -p /srv/www
+sudo chown www-data: /srv/www
+curl https://wordpress.org/latest.tar.gz | sudo -u www-data tar zx -C /srv/www
+
+1
+
+//3 Apache, y crear el archivo de configuracion /etc/sites-available/wordpress.conf 
+// sudo nano /etc/apache2/sites-available/wordpress.conf
+
+
+
+<VirtualHost *:80>
+    DocumentRoot /srv/www/wordpress
+    <Directory /srv/www/wordpress>
+        Options FollowSymLinks
+        AllowOverride Limit Options FileInfo
+        DirectoryIndex index.php
+        Require all granted
+    </Directory>
+    <Directory /srv/www/wordpress/wp-content>
+        Options FollowSymLinks
+        Require all granted
+    </Directory>
+</VirtualHost>
+Enable the site with:
+
+sudo a2ensite wordpress
+
+Enable URL rewriting with:
+
+sudo a2enmod rewrite
+
+Remover el archivo default:
+
+sudo a2dissite 000-default
+
+sudo service apache2 reload
+
+
+
+//4 crear la base de datos MySQL
+
+$ sudo mysql -u root
+
+ CREATE DATABASE wordpress;
+
+
+CREATE USER wordpress@localhost IDENTIFIED BY 'antonio';
+
+GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER ON wordpress.* TO wordpress@localhost;
+
+FLUSH PRIVILEGES;
+
+quit;
+
+//reinicar el servicio
+
+sudo service mysql start
+
+
+
+
+//5 Configura WordPress y la conexion de las bases de datos
+
+sudo -u www-data cp /srv/www/wordpress/wp-config-sample.php /srv/www/wordpress/wp-config.php
+
+
+sudo -u www-data sed -i 's/database_name_here/wordpress/' /srv/www/wordpress/wp-config.php
+sudo -u www-data sed -i 's/username_here/wordpress/' /srv/www/wordpress/wp-config.php
+
+/// 's/password_here/you_password/' 
+
+sudo -u www-data sed -i 's/password_here/antonio/' /srv/www/wordpress/wp-config.php
+
+sudo -u www-data nano /srv/www/wordpress/wp-config.php
+
+define( 'AUTH_KEY',         'antonio' );
+define( 'SECURE_AUTH_KEY',  'antonio' );
+define( 'LOGGED_IN_KEY',    'antonio' );
+define( 'NONCE_KEY',        'antonio' );
+define( 'AUTH_SALT',        'antonio' );
+define( 'SECURE_AUTH_SALT', 'antonio' );
+define( 'LOGGED_IN_SALT',   'antonio' );
+define( 'NONCE_SALT',       'antonio' );
+
+
+
+//6 Configuracion WordPress
